@@ -23,17 +23,42 @@ export class SingerController {
     for (const singer of singers) {
       const scores = await this.scoreService.findBySId(singer._id);
       const sid = singer._id.toString();
-      let total = 0;
+      // let total = 0;
       const values = {};
+      const iValues = {
+        min: {
+          jid: '',
+          value: 10001,
+        },
+        max: {
+          jid: '',
+          value: -1,
+        },
+      };
       scores.forEach((item) => {
-        total += item.value;
-        values[item.judgeId.toString()] = item.value;
+        // total += item.value;
+        const jid = item.judgeId.toString();
+        values[jid] = item.value;
+
+        if (iValues.min.value > item.value) {
+          iValues.min.value = item.value;
+          iValues.min.jid = jid;
+        }
+
+        if (iValues.max.value <= item.value) {
+          iValues.max.value = item.value;
+          iValues.max.jid = jid;
+        }
       });
       const scoreRes = {
-        total,
+        // total,
         count: scores.length,
-        avg: scores.length ? Number((total / scores.length).toFixed(2)) : 0,
+        // avg: scores.length ? Number((total / scores.length).toFixed(2)) : 0,
         values,
+        iValues: {
+          [iValues.min.jid]: iValues.min.value,
+          [iValues.max.jid]: iValues.max.value,
+        },
       };
       scoresRes[sid] = scoreRes;
     }

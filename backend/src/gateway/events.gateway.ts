@@ -1,6 +1,7 @@
 import {
   ConnectedSocket,
   MessageBody,
+  OnGatewayConnection,
   OnGatewayDisconnect,
   SubscribeMessage,
   WebSocketGateway,
@@ -30,12 +31,15 @@ export class EventsGateway implements OnGatewayDisconnect {
   // 依赖注入是单例模式
   // private jid: string;
   private jidMap: object = {};
+  private clientMap: object = {};
 
   @WebSocketServer()
   server: Server;
 
   handleDisconnect(client: any) {
     const jid = this.jidMap[client.id];
+    delete this.jidMap[client.id];
+    delete this.clientMap[client.id];
     console.log('Client disconnected: ', jid);
     if (jid === 'home') {
       // CacheUtil.del('csId');
@@ -53,7 +57,17 @@ export class EventsGateway implements OnGatewayDisconnect {
     @ConnectedSocket() client: any,
   ): Promise<any> {
     const jid = data;
+    for (const key in this.jidMap) {
+      if (Object.prototype.hasOwnProperty.call(this.jidMap, key)) {
+        if (jid === this.jidMap[key]) {
+          this.clientMap[jid].disconnect();
+          delete this.clientMap[key];
+        }
+      }
+    }
     this.jidMap[client.id] = data;
+    this.clientMap[jid] = client;
+    console.log('Client binded: ', jid);
     // 主页
     if (data === 'home') {
       const judges = await this.judgeService.get();

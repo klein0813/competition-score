@@ -19,6 +19,7 @@ const showError = ref(false);
 const name = ref('');
 const open = ref(true);
 const hasScore = ref(false);
+const showDisconnectModal= ref(false);
 
 let singer = reactive({ value: {} });
 
@@ -51,10 +52,16 @@ const toContent = (jid) => {
       singer.value = data ?? {};
       socket.emit(EVENT_GET_SCORE, null, getScoreResponse);
     });
+    socket.on('disconnect', () => {
+      console.log('disconnect');
+      showDisconnectModal.value = true;
+    });
     window.addEventListener(WIN_EVENT_UNLOAD, socket.close);
   }, (currentSinger) => {
+    console.log('currentSinger: ', currentSinger);
     singer.value = currentSinger ?? {};
     toRaw(singer.value)._id && socket.emit(EVENT_GET_SCORE, null, getScoreResponse);
+    showDisconnectModal.value = false;
   });
 };
 
@@ -110,6 +117,9 @@ const pageHeight = ref(window.innerHeight);
       <template #footer>
         <a-button key="submit" type="primary" @click="handleOk">提交</a-button>
       </template>
+    </a-modal>
+    <a-modal v-model:open="showDisconnectModal" :closable="false" :mask-closable="false" :centered="true" :footer="null">
+      <div style="text-align: center;">连接断开</div>
     </a-modal>
   </a-watermark>
 </template>
