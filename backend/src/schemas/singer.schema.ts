@@ -16,9 +16,19 @@ export class Singer extends Base {
   class: string;
 
   @Prop({
-    required: true,
+    required: false,
   })
-  number: string;
+  number: number;
+
+  @Prop({
+    required: false,
+  })
+  song: string;
+
+  @Prop({
+    required: false,
+  })
+  accompany: string;
 
   static getCollectionName(): string {
     return 'singer';

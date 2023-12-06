@@ -1,6 +1,6 @@
-export const HOST = 'http://cycsshs.singer';
-// export const HOST = 'http://192.168.10.15';
-// export const HOST = 'http://192.168.1.6';
+// export const HOST = 'http://cycsshs.singer';
+export const HOST = 'http://192.168.10.15';
+// export const HOST = 'http://192.168.1.7';
 
 export const EVENT_HOME = 'home';
 export const EVENT_SCORE = 'score';

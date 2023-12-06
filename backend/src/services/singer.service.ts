@@ -20,7 +20,7 @@ export class SingerService {
   }
 
   get() {
-    return this.singerModel.find({});
+    return this.singerModel.find({}).sort({ number: 1 });
   }
 
   create(params) {
