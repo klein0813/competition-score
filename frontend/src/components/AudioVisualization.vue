@@ -1108,7 +1108,7 @@ input[type="file"] {
 }
 
 #canvas {
-  mix-blend-mode: color-dodge;
+  /* mix-blend-mode: color-dodge; */
 }
 
 /* #txtStatus {

@@ -1,6 +1,8 @@
 <script setup>
-import { onMounted } from 'vue';
+import { onMounted, ref, watch } from 'vue';
 const props = defineProps(['audio', 'auid', 'audioSource', 'analyser', 'song']);
+
+const currentProgress = ref(0);
 
 // 音乐播放器
 class MusicPlayer {
@@ -10,36 +12,47 @@ class MusicPlayer {
         this._requestID = null;
         // 特效单体
         this._effectEntity = new Entity();
-        this._effectEntity.addComp(new MusicBtnSingleComp({
+        this._effectEntity.addComp(new MusicBtnSingleComp({   // 音乐按钮
             callback: () => {
-              this.animateControl();
+              this.animateControl(props.audio.paused);
             }
         }));
-        this._effectEntity.addComp(new MusicSingleComp({
+        this._effectEntity.addComp(new MusicSingleComp({      // 音乐
             musicSrc: data.musicSrc
         }));
-        this._effectEntity.addComp(new MusicEffectSingleComp({
+        this._effectEntity.addComp(new MusicEffectSingleComp({ // 音乐特效
             effectColor: data.effectColor
         }))
+        props.audio.addEventListener('ended', () => {
+            this._effectEntity.getComp("MusicBtnSingleComp").isRotate = false;
+            currentProgress.value = 100;
+        }, false );
     }
 
     _renderFrame() {
         this._requestID = requestAnimationFrame(this._renderFrame.bind(this));
+        currentProgress.value = 100 * props.audio.currentTime / props.audio.duration;
 
         this._effectEntity.getComp("MusicEffectSingleComp").byteFrequencyDate = this._effectEntity.getComp("MusicSingleComp").byteFrequencyDate;
     }
 
     reset() {
       cancelAnimationFrame(this._requestID);
+      console.log('reset');
+      this._effectEntity.getComp("MusicSingleComp").isReady = false;
+      this._effectEntity.getComp("MusicBtnSingleComp").isRotate = false;
+      this._effectEntity.getComp("MusicBtnSingleComp").setAnimation(false);
+      currentProgress.value = 100 * props.audio.currentTime / props.audio.duration;
     }
 
-    animateControl() {
-      this._effectEntity.getComp("MusicBtnSingleComp").isRotate = !this._effectEntity.getComp("MusicBtnSingleComp").isRotate;
-      !this._effectEntity.getComp("MusicSingleComp").isReady &&(this._effectEntity.getComp("MusicSingleComp").isReady = true);
-      console.log('isPlay', this._effectEntity.getComp("MusicSingleComp").isPlay);
-      this._effectEntity.getComp("MusicSingleComp").isPlay = !this._effectEntity.getComp("MusicSingleComp").isPlay;
-
-      if(!this._effectEntity.getComp("MusicSingleComp").isPlay) {
+    animateControl(flag) {
+        if (!this._effectEntity.getComp("MusicSingleComp").isReady) {
+            this._effectEntity.getComp("MusicSingleComp").isReady = true;
+            this._effectEntity.getComp("MusicBtnSingleComp").setAnimation(true);
+        }
+        this._effectEntity.getComp("MusicBtnSingleComp").isRotate = !this._effectEntity.getComp("MusicBtnSingleComp").isRotate;
+        this._effectEntity.getComp("MusicSingleComp").isPlay = flag;
+        if(!this._effectEntity.getComp("MusicSingleComp").isPlay) {
           cancelAnimationFrame(this._requestID);
       } else {
           this._requestID = requestAnimationFrame(this._renderFrame.bind(this));
@@ -82,6 +95,10 @@ class MusicBtnSingleComp {
 
     get isRotate() {
         return this._isRotate;
+    }
+
+    setAnimation(value) {
+        this._musicBtnDom.classList[value ? 'add' : 'remove']("animation");
     }
 }
 
@@ -179,22 +196,35 @@ function formatSong(song) {
     return song.substring(0, 4);
 }
 
-let reset = () => {};
+let musicPlayer = null;
 
 defineExpose({
-  reset
+  reset: () => {
+    musicPlayer.reset();
+  },
 })
 
 onMounted(() => {
-  const musicPlayer = new MusicPlayer();
-  reset = musicPlayer.reset;
+  musicPlayer = new MusicPlayer();
 });
 </script>
 
 <template>
  <div class="music-box">
     <canvas class="my-canvas"></canvas>
-    <button :id="props.auid" class="my-music-btn rotate">{{ formatSong(props.song) }}</button>
+    <a-progress
+      class="progress"
+      type="circle"
+      :format="() => ''"
+      :stroke-color="{
+        '0%': '#108ee9',
+        '100%': '#87d068',
+      }"
+      :percent="currentProgress"
+      :size="285"
+      :stroke-width="1"
+    />
+    <button :id="props.auid" class="my-music-btn animation rotate">{{ formatSong(props.song) }}</button>
   </div>
 </template>
 
@@ -225,11 +255,19 @@ onMounted(() => {
       border-radius: 50%;
       border: none;
       outline: none;
-      animation: music-btn-anim 20s infinite linear;
+      /* animation: music-btn-anim 20s infinite linear; */
       color: #fff;
       font-size: 90px;
       font-family: cursive;
       background-color: transparent;
+  }
+
+  .progress {
+    position: absolute;
+  }
+
+  .animation {
+    animation: music-btn-anim 20s infinite linear;
   }
 
   .my-music-btn.rotate {

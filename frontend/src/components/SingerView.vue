@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, watch } from 'vue';
 import { LeftOutlined, RightOutlined } from '@ant-design/icons-vue';
 import { changeSinger } from '../api';
 import { getName1stLetter } from '../utils/common';
@@ -29,6 +29,11 @@ const onSingerChange = (current) => {
     });
   });
 };
+
+watch(() => props.active, (newVal) => {
+  console.log(props.active);
+  singerswiper.value.goTo(newVal);
+});
 </script>
 
 <template>

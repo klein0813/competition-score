@@ -14,4 +14,4 @@ export const WIN_EVENT_UNLOAD = 'unload';
 
 export const LS_KEY_JID = 'gccss:jid';
 
-export const GAME_NAME = '崇阳县第二高级中学首届“校园十佳歌手大赛”';
+export const GAME_NAME = '崇阳县第二高级中学首届“校园十佳歌手比赛”决赛';

@@ -28,6 +28,7 @@ const gameName = ref(GAME_NAME);
 
 const scorelist = ref(null);
 const audom = ref(null);
+const audom2 = ref(null);
 const scoreview = ref(null);
 
 const au = new Audio();
@@ -43,6 +44,7 @@ const onSingerChange = (data) => {
   audio.currentTime = 0;
   console.log('audom', audom);
   audom.value.reset();
+  audom2.value.reset();
   song.value = ssong;
 };
 
@@ -129,7 +131,7 @@ function onBegin() {
         <div class="content" v-show="isIndex">
           <div class="singer-swiper">
             <singer-view :active="swiperIndex" :singers="singers" @singer-change="onSingerChange"></singer-view>
-            <audio-visualization2 :audio="audio" :audio-source="audioSource.value" :analyser="audioSource.analyser" :song="song" auid="auid"></audio-visualization2>
+            <audio-visualization2 ref="audom2" :audio="audio" :audio-source="audioSource.value" :analyser="audioSource.analyser" :song="song" auid="auid"></audio-visualization2>
           </div>
           <div class="score">
             <score-view ref="scoreview" :judges="judges" :online-jids="onlineJids"></score-view>
@@ -161,10 +163,10 @@ function onBegin() {
   background: linear-gradient(180deg,#fffae9 0,#fffae9 30%,#ffce3c 60%, #e6b522);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
-  font-size: 48px;
+  font-size: 56px;
   text-align: center;
-  height: 120px;
-  line-height: 120px;
+  height: 180px;
+  line-height: 180px;
   z-index: 1;
 }
 
